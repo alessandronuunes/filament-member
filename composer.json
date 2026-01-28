@@ -1,0 +1,33 @@
+{
+    "name": "alessandronuunes/filament-member",
+    "type": "library",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "AlessandroNuunes\\FilamentMember\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "alessandronuunes",
+            "email": "alessandronuunes@gmail.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {
+        "php": "^8.3",
+        "spatie/laravel-package-tools": "^1.16",
+        "filament/filament": "^4.0"
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "AlessandroNuunes\\FilamentMember\\FilamentMemberServiceProvider"
+            ]
+        }
+    },
+    "require-dev": {
+        "driftingly/rector-laravel": "dev-main",
+        "laravel/pint": "dev-main"
+    }
+}

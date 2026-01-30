@@ -18,8 +18,8 @@ A comprehensive Filament plugin for managing tenant members, invitations, and ro
 ## Requirements
 
 - PHP 8.3 or higher
-- Laravel 11.x
-- Filament 4.0 or higher
+- Laravel 11.x or 12.x
+- Filament 4.x or 5.x
 
 ## Installation
 
@@ -72,11 +72,13 @@ public function panel(Panel $panel): Panel
 Edit `config/filament-member.php` to customize:
 
 - **Models**: Change the User, Tenant, and TenantInvite models
-- **Tables**: Customize database table names
-- **Routes**: Modify invitation acceptance routes
-- **Invites**: Configure default roles, expiration days, and behavior
-- **Permissions**: Set role-based permissions
-- **Notifications**: Configure email settings
+- **Enums**: Set a custom tenant role enum
+- **Tables**: Customize database table names and relationship columns
+- **Tenancy**: Filament tenancy (slug, ownership, route prefix)
+- **Routes**: Invitation accept path, name, and middleware
+- **Invites**: Default role, expiration days, require registration
+- **Notifications**: Send invite email, queue, from address
+- **Validation**: Require role on invite
 
 ## Usage
 
@@ -130,37 +132,41 @@ Update the model classes in `config/filament-member.php`:
 
 ### Custom Roles
 
-Modify the `TenantRole` enum to add or change roles:
+Use your own role enum by setting it in `config/filament-member.php`:
 
 ```php
-enum TenantRole: string
-{
-    case Owner = 'owner';
-    case Admin = 'admin';
-    case Member = 'member';
-    case Moderator = 'moderator'; // Add custom role
-}
-```
-
-### Custom Routes
-
-Change the invitation acceptance route:
-
-```php
-'routes' => [
-    'invite_accept_path' => '/join/{token}',
-    'invite_accept_name' => 'join.organization',
-    'invite_accept_middleware' => ['signed', 'auth'],
+'enums' => [
+    'tenant_role' => App\Enums\TenantRole::class,
 ],
 ```
 
+Your enum should use string backing values (e.g. `owner`, `admin`, `member`) and implement Filament's `HasLabel` and `HasColor` for the admin UI. To add or change roles, define cases in your enum (e.g. `case Moderator = 'moderator';`).
+
+### Custom Routes
+
+Change the invitation acceptance route in `config/filament-member.php`:
+
+```php
+'routes' => [
+    'invite_accept_path' => '/invite/{token}/accept',
+    'invite_accept_name' => 'invite.accept',
+    'invite_accept_middleware' => ['signed'],
+],
+```
+
+### Theme / Styling
+
+For the plugin styles to work correctly in your Filament panel, add the `@source` directive to your theme file (e.g. `resources/css/filament/admin/theme.css`):
+
+```css
+@source '../../../../vendor/alessandronuunes/filament-member/resources/views/filament/**/*';
+```
+
+This ensures Tailwind scans the plugin's Blade views and generates the required CSS classes.
+
 ### Custom Views
 
-Publish and customize the views:
-
-```bash
-php artisan vendor:publish --tag=filament-member-views
-```
+To override the plugin views, copy the Blade files from `vendor/alessandronuunes/filament-member/resources/views` to your project (e.g. `resources/views/vendor/filament-member`) and edit them. Your copies will take precedence over the package views.
 
 ## Translations
 
@@ -175,7 +181,7 @@ To add more languages, publish the translations and add your language files:
 php artisan vendor:publish --tag=filament-member-translations
 ```
 
-Translation files are located in `resources/lang/{locale}/default.php`.
+After publishing, translation files are located in `lang/vendor/filament-member/{locale}/default.php`.
 
 ## Database Structure
 
@@ -186,11 +192,12 @@ The plugin creates three tables:
 - `user_id` (owner)
 - `name`
 - `slug`
+- `invitation_token` (nullable, for generic invite links)
 - `status`
-- `invitation_token`
 - `timestamps`
 
 ### `tenant_user` (pivot table)
+- `id`
 - `tenant_id`
 - `user_id`
 - `role`

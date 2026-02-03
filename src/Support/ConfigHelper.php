@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace AlessandroNuunes\FilamentMember\Support;
 
-use AlessandroNuunes\FilamentMember\Enums\TenantRole;
-use AlessandroNuunes\FilamentMember\Models\Tenant;
-use AlessandroNuunes\FilamentMember\Models\TenantInvite;
 use App\Models\User;
+use AlessandroNuunes\FilamentMember\Models\Tenant;
+use AlessandroNuunes\FilamentMember\Enums\TenantRole;
+use AlessandroNuunes\FilamentMember\Models\TenantInvite;
 
 class ConfigHelper
 {
@@ -153,5 +153,13 @@ class ConfigHelper
     public static function getNavigationConfig(string $pageKey, string $key, mixed $default = null): mixed
     {
         return self::get(sprintf('navigation.%s.%s', $pageKey, $key), $default);
+    }
+
+    /**
+     * Get a navigation configuration value.
+     */
+    public static function getNavigationConfig(string $pageKey, string $key, mixed $default = null): mixed
+    {
+        return self::get("navigation.{$pageKey}.{$key}", $default);
     }
 }

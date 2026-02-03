@@ -146,10 +146,10 @@ return [
     // ============================================
     'navigation' => [
         'tenant_members_page' => [
-            'icon' => 'heroicon-o-users',
+            'group' => null, // null = usa __('filament-member::default.navigation.group')
             'sort' => 2,
-            // 'group' => null, // null = usa __('filament-member::default.navigation.group')
-            // 'label' => null, // null = usa __('filament-member::default.navigation.label')
+            'icon' => 'heroicon-o-users',
+            'label' => null, // null = usa __('filament-member::default.navigation.label')
         ],
     ],
 ];

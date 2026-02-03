@@ -9,7 +9,7 @@ return [
     |--------------------------------------------------------------------------
     */
 
-    'navigation.group' => '',
+    'navigation.group' => 'Organização',
     'navigation.label' => 'Membros',
 
     /*

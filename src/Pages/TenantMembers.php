@@ -24,7 +24,6 @@ use Filament\Schemas\Schema;
 use Filament\Support\Enums\Alignment;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Contracts\Support\Htmlable;
-use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\HtmlString;
 use Illuminate\Support\Str;
@@ -48,13 +47,47 @@ class TenantMembers extends Page
     #[Override]
     public static function getNavigationGroup(): ?string
     {
+        $configGroup = ConfigHelper::getNavigationConfig('tenant_members_page', 'group');
+
+        if ($configGroup !== null && $configGroup !== '') {
+            return $configGroup;
+        }
+
         return __('filament-member::default.navigation.group');
     }
 
     #[Override]
     public static function getNavigationLabel(): string
     {
+        $configLabel = ConfigHelper::getNavigationConfig('tenant_members_page', 'label');
+
+        if ($configLabel !== null && $configLabel !== '') {
+            return $configLabel;
+        }
+
         return __('filament-member::default.navigation.label');
+    }
+
+    #[Override]
+    public static function getNavigationIcon(): ?string
+    {
+        $configIcon = ConfigHelper::getNavigationConfig('tenant_members_page', 'icon');
+
+        if ($configIcon !== null && $configIcon !== '') {
+            return $configIcon;
+        }
+
+        return static::$navigationIcon instanceof BackedEnum
+            ? static::$navigationIcon->value
+            : static::$navigationIcon;
+    }
+
+    #[Override]
+    public static function getNavigationSort(): ?int
+    {
+        $configSort = ConfigHelper::getNavigationConfig('tenant_members_page', 'sort');
+
+        return is_numeric($configSort) ? (int) $configSort : static::$navigationSort;
     }
 
     #[Override]
@@ -81,16 +114,17 @@ class TenantMembers extends Page
             return [];
         }
 
-        $ownerValue = defined($enumClass . '::Owner')
+        $options = [];
+        foreach ($enumClass::cases() as $case) {
+            $options[$case->value] = method_exists($case, 'getLabel') ? $case->getLabel() : $case->name;
+        }
+
+        $ownerValue = enum_exists($enumClass) && defined($enumClass.'::Owner')
             ? $enumClass::Owner->value
             : 'owner';
+        unset($options[$ownerValue]);
 
-        return collect($enumClass::cases())
-            ->mapWithKeys(fn ($case): array => [
-                $case->value => method_exists($case, 'getLabel') ? $case->getLabel() : $case->name,
-            ])
-            ->except($ownerValue)
-            ->all();
+        return $options;
     }
 
     public function mount(): void
@@ -115,7 +149,7 @@ class TenantMembers extends Page
                             ->minItems(1)
                             ->maxItems(5)
                             ->defaultItems(1)
-                            ->deletable(fn ($state): bool => count((array) $state) > 1)
+                            ->deletable(fn ($state): bool => is_array($state) && count($state) > 1)
                             ->reorderable(false)
                             ->addActionLabel(__('filament-member::default.action.add_another_member'))
                             ->schema([
@@ -149,11 +183,11 @@ class TenantMembers extends Page
                             ->size('sm')
                             ->action(function (): void {
                                 $tenant = Filament::getTenant();
-                                if (blank($tenant)) {
+                                if (! $tenant) {
                                     return;
                                 }
 
-                                if (blank($tenant->invitation_token)) {
+                                if (! $tenant->invitation_token) {
                                     $tenant->update(['invitation_token' => Str::random(32)]);
                                     $tenant->refresh();
                                 }
@@ -191,10 +225,10 @@ class TenantMembers extends Page
     public function create(): void
     {
         $formData = $this->getSchema('form')?->getState() ?? [];
-        $emailAddresses = Arr::get($formData, 'emailAddresses', []);
+        $emailAddresses = $formData['emailAddresses'] ?? [];
         $tenant = Filament::getTenant();
 
-        if (blank($tenant)) {
+        if (! $tenant) {
             return;
         }
 
@@ -207,7 +241,7 @@ class TenantMembers extends Page
         foreach ($emailAddresses as $item) {
             $emailAddress = $item['email'] ?? null;
             $role = $item['role'] ?? $defaultRole;
-            if (blank($emailAddress)) {
+            if (! $emailAddress) {
                 continue;
             }
 
@@ -216,7 +250,7 @@ class TenantMembers extends Page
             }
 
             $existing = $inviteModel::query()
-                ->where('tenant_id', $tenant->getKey())
+                ->where('tenant_id', $tenant->id)
                 ->where('email', $emailAddress)
                 ->whereNull('accepted_at')
                 ->where('expires_at', '>', now())
@@ -228,7 +262,7 @@ class TenantMembers extends Page
 
             tap(
                 $inviteModel::create([
-                    'tenant_id' => $tenant->getKey(),
+                    'tenant_id' => $tenant->id,
                     'user_id' => auth()->id(),
                     'email' => $emailAddress,
                     'token' => Str::random(32),
@@ -268,7 +302,7 @@ class TenantMembers extends Page
         return [
             'members' => Tab::make(__('filament-member::default.tab.members')),
             'pending-invitations' => Tab::make(__('filament-member::default.tab.pending_invitations'))
-                ->badge(ConfigHelper::getTenantInviteModel()::where('tenant_id', $tenant?->getKey())->whereNull('accepted_at')->count()),
+                ->badge(ConfigHelper::getTenantInviteModel()::where('tenant_id', $tenant?->id)->whereNull('accepted_at')->count()),
         ];
     }
 

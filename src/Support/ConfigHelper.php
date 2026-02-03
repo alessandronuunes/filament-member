@@ -11,14 +11,12 @@ use App\Models\User;
 
 class ConfigHelper
 {
-    private const CONFIG_KEY = 'filament-member';
-
     /**
      * Get a configuration value with optional default.
      */
     public static function get(string $key, mixed $default = null): mixed
     {
-        return config(self::CONFIG_KEY.'.'.$key, $default);
+        return config('filament-member.'.$key, $default);
     }
 
     /**
@@ -58,7 +56,7 @@ class ConfigHelper
      */
     public static function getTable(string $table): string
     {
-        return (string) self::get('tables.' . $table, $table);
+        return self::get('tables.'.$table, $table);
     }
 
     /**
@@ -66,24 +64,15 @@ class ConfigHelper
      */
     public static function getRelationshipColumn(string $column): string
     {
-        return (string) self::get('relationships.' . $column, $column);
+        return self::get('relationships.'.$column, $column);
     }
 
     /**
-     * Get the tenant foreign key column name (pivot and queries).
-     * Use 'tenant_id' or 'reseller_id' when using Reseller as tenant.
+     * Get the tenant foreign key column name (e.g. tenant_id on pivot tenant_user).
      */
     public static function getTenantForeignKeyColumn(): string
     {
-        return (string) self::get('relationships.tenant_foreign_key', 'tenant_id');
-    }
-
-    /**
-     * Get a tenancy configuration.
-     */
-    public static function getTenancyConfig(string $key, mixed $default = null): mixed
-    {
-        return self::get('tenancy.' . $key, $default);
+        return self::get('relationships.tenant_foreign_key_column', 'tenant_id');
     }
 
     /**
@@ -91,7 +80,15 @@ class ConfigHelper
      */
     public static function getRoute(string $key): mixed
     {
-        return self::get('routes.' . $key);
+        return self::get('routes.'.$key);
+    }
+
+    /**
+     * Get a tenancy configuration value (slug_attribute, ownership_relationship, route_prefix).
+     */
+    public static function getTenancyConfig(string $key, mixed $default = null): mixed
+    {
+        return self::get('tenancy.'.$key, $default);
     }
 
     /**
@@ -99,7 +96,7 @@ class ConfigHelper
      */
     public static function getView(string $type, string $view): string
     {
-        return (string) self::get(sprintf('views.%s.%s', $type, $view));
+        return self::get(sprintf('views.%s.%s', $type, $view));
     }
 
     /**
@@ -107,7 +104,15 @@ class ConfigHelper
      */
     public static function getInviteConfig(string $key, mixed $default = null): mixed
     {
-        return self::get('invites.' . $key, $default);
+        return self::get('invites.'.$key, $default);
+    }
+
+    /**
+     * Get a permission configuration.
+     */
+    public static function getPermissionConfig(string $key, mixed $default = null): mixed
+    {
+        return self::get('permissions.'.$key, $default);
     }
 
     /**
@@ -115,7 +120,7 @@ class ConfigHelper
      */
     public static function getDefault(string $key, mixed $default = null): mixed
     {
-        return self::get('defaults.' . $key, $default);
+        return self::get('defaults.'.$key, $default);
     }
 
     /**
@@ -123,7 +128,7 @@ class ConfigHelper
      */
     public static function getNotificationConfig(string $key, mixed $default = null): mixed
     {
-        return self::get('notifications.' . $key, $default);
+        return self::get('notifications.'.$key, $default);
     }
 
     /**
@@ -131,7 +136,7 @@ class ConfigHelper
      */
     public static function getSortingConfig(string $key, mixed $default = null): mixed
     {
-        return self::get('sorting.' . $key, $default);
+        return self::get('sorting.'.$key, $default);
     }
 
     /**
@@ -139,6 +144,14 @@ class ConfigHelper
      */
     public static function getValidationConfig(string $key, mixed $default = null): mixed
     {
-        return self::get('validation.' . $key, $default);
+        return self::get('validation.'.$key, $default);
+    }
+
+    /**
+     * Get a navigation configuration value.
+     */
+    public static function getNavigationConfig(string $pageKey, string $key, mixed $default = null): mixed
+    {
+        return self::get(sprintf('navigation.%s.%s', $pageKey, $key), $default);
     }
 }

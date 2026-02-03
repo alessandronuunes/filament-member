@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace AlessandroNuunes\FilamentMember\Listeners;
 
-use BackedEnum;
 use AlessandroNuunes\FilamentMember\Models\TenantInvite;
 use AlessandroNuunes\FilamentMember\Support\ConfigHelper;
+use BackedEnum;
 use Filament\Facades\Filament;
 use Filament\Notifications\Notification;
 use Illuminate\Auth\Events\Login;

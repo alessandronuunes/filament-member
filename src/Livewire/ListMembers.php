@@ -67,9 +67,9 @@ class ListMembers extends TableComponent
         $query = $tenant
             ? $userModel::query()
                 ->withoutGlobalScopes()
-                ->join($pivotTable, 'users.id', '=', $pivotTable . '.user_id')
-                ->where($pivotTable . '.' . $tenantFkColumn, $tenant->getKey())
-                ->select('users.*', sprintf('%s.%s as pivot_role', $pivotTable, $roleColumn), $pivotTable . '.created_at as joined_at')
+                ->join($pivotTable, 'users.id', '=', $pivotTable.'.user_id')
+                ->where($pivotTable.'.'.$tenantFkColumn, $tenant->getKey())
+                ->select('users.*', sprintf('%s.%s as pivot_role', $pivotTable, $roleColumn), $pivotTable.'.created_at as joined_at')
                 ->orderByRaw($this->buildRoleOrderBy($pivotTable, $roleColumn, $rolePriority), $rolePriority)
                 ->orderBy('users.name')
             : $userModel::query()->whereRaw('1 = 0');

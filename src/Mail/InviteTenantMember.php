@@ -27,11 +27,9 @@ class InviteTenantMember extends Mailable
     {
         $tenantName = $this->invite->tenant?->name ?? __('filament-member::default.message.organization_name');
         $fromAddress = ConfigHelper::getNotificationConfig('invite_email_from_address', config('mail.from.address'))
-            ?? config('mail.from.address')
-            ?? 'noreply@example.com';
+            ?? config('mail.from.address', 'noreply@example.com');
         $fromName = ConfigHelper::getNotificationConfig('invite_email_from_name', config('mail.from.name'))
-            ?? config('mail.from.name')
-            ?? '';
+            ?? config('mail.from.name', '');
 
         return new Envelope(
             from: new Address($fromAddress, (string) $fromName),

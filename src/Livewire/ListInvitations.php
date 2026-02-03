@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace AlessandroNuunes\FilamentMember\Livewire;
 
-use BackedEnum;
 use AlessandroNuunes\FilamentMember\Events\TenantInviteCreated;
 use AlessandroNuunes\FilamentMember\Support\ConfigHelper;
+use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\DeleteAction;

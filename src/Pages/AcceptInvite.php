@@ -208,7 +208,7 @@ class AcceptInvite extends SimplePage
             return __('filament-member::default.page.subheading.generic_invite', ['name' => $this->tenant->name]);
         }
 
-        $inviterName = optional($this->invite->user)->name ?? __('filament-member::default.message.someone');
+        $inviterName = $this->invite->user?->name ?? __('filament-member::default.message.someone');
 
         return __('filament-member::default.page.subheading.individual_invite', ['name' => $inviterName]);
     }

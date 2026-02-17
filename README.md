@@ -53,6 +53,8 @@ Run the migrations:
 php artisan migrate
 ```
 
+Then complete the setup by [configuring your User model](#user-model-required) and [registering the plugin](#register-the-plugin).
+
 ## Configuration
 
 ### Register the Plugin
@@ -70,6 +72,36 @@ public function panel(Panel $panel): Panel
         ]);
 }
 ```
+
+### User Model (Required)
+
+The plugin enables [Filament tenancy](https://filamentphp.com/docs/panels/tenancy) on your panel. Filament will call `getTenants(Panel $panel)` on your User model to resolve which tenants the user can access. **Your User model must implement this.**
+
+Add the `HasTenantRelations` trait and the `HasTenants` contract to your User model:
+
+```php
+use Filament\Models\Contracts\FilamentUser;
+use Filament\Models\Contracts\HasTenants;
+use Filament\Panel;
+use AlessandroNuunes\FilamentMember\Traits\HasTenantRelations;
+use Illuminate\Support\Collection;
+
+class User extends Authenticatable implements FilamentUser, HasTenants
+{
+    use HasTenantRelations;
+
+    // ...
+}
+```
+
+The trait provides:
+
+- `getTenants(Panel $panel): Collection` — tenants the user owns plus tenants they are a member of
+- `canAccessTenant(Model $tenant): bool` — required by Filament for tenancy
+- `tenants()` — relationship for tenants owned by the user
+- `memberTenants()` — relationship for tenants where the user is a member
+
+If your app uses a different tenant model (e.g. `Organization`), set it in `config/filament-member.php` under `models.tenant`. The trait uses that configuration for relationships and table names.
 
 ### Customize Configuration
 
